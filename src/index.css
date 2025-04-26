@@ -1,0 +1,65 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --space-xs: 0.5rem;
+    --space-sm: 0.75rem;
+    --space-md: 1.25rem;
+    --space-lg: 2rem;
+    --space-xl: 3rem;
+  }
+  
+  html {
+    @apply antialiased;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  body {
+    @apply bg-white text-gray-900 antialiased tracking-wide transition-colors duration-300 ease-in-out font-sans leading-relaxed;
+  }
+  
+  .dark body {
+    @apply bg-gray-950 text-gray-100;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-medium tracking-tight leading-tight;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-white/60 dark:bg-gray-900/60 backdrop-blur-md border border-gray-200/80 dark:border-gray-800/80 rounded-2xl shadow-glass transition-all duration-300;
+  }
+  
+  .glass-card:hover {
+    @apply border-gray-300/60 dark:border-gray-700/60 shadow-lg;
+  }
+  
+  .btn-primary {
+    @apply px-6 py-3 bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-medium rounded-xl transition-all duration-300 hover:opacity-90 hover:shadow-md active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-gray-400 dark:focus:ring-gray-600;
+  }
+  
+  .btn-secondary {
+    @apply px-6 py-3 bg-transparent border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white font-medium rounded-xl transition-all duration-300 hover:bg-gray-100 dark:hover:bg-gray-800 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-gray-400 dark:focus:ring-gray-600;
+  }
+  
+  .btn-icon {
+    @apply p-2 rounded-full bg-transparent text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-300 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-gray-400 dark:focus:ring-gray-600;
+  }
+  
+  .input-field {
+    @apply w-full px-4 py-3 bg-gray-50/80 dark:bg-gray-800/80 border border-gray-200/80 dark:border-gray-700/80 rounded-xl focus:outline-none focus:ring-1 focus:ring-gray-900 dark:focus:ring-white dark:text-white transition-all duration-300;
+  }
+  
+  .label-text {
+    @apply block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 tracking-wide;
+  }
+  
+  .section-title {
+    @apply text-lg font-medium mb-5 text-gray-900 dark:text-white tracking-wide;
+  }
+}

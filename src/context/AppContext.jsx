@@ -17,6 +17,17 @@ export const AppProvider = ({ children }) => {
     totalFocusTime: 0,
   })
   
+  // Add tasks management
+  const [tasks, setTasks] = useState(() => {
+    const savedTasks = localStorage.getItem('focusflow-tasks')
+    return savedTasks ? JSON.parse(savedTasks) : []
+  })
+  
+  const [currentTaskId, setCurrentTaskId] = useState(() => {
+    const savedCurrentTask = localStorage.getItem('focusflow-current-task')
+    return savedCurrentTask || null
+  })
+  
   const [settings, setSettings] = useState(() => {
     const savedSettings = localStorage.getItem('focusflow-settings')
     return savedSettings ? JSON.parse(savedSettings) : {
@@ -43,6 +54,20 @@ export const AppProvider = ({ children }) => {
   useEffect(() => {
     localStorage.setItem('focusflow-settings', JSON.stringify(settings))
   }, [settings])
+  
+  // Save tasks to localStorage when they change
+  useEffect(() => {
+    localStorage.setItem('focusflow-tasks', JSON.stringify(tasks))
+  }, [tasks])
+  
+  // Save current task to localStorage
+  useEffect(() => {
+    if (currentTaskId) {
+      localStorage.setItem('focusflow-current-task', currentTaskId)
+    } else {
+      localStorage.removeItem('focusflow-current-task')
+    }
+  }, [currentTaskId])
   
   // Toggle between light and dark mode
   const toggleTheme = () => {
@@ -82,6 +107,47 @@ export const AppProvider = ({ children }) => {
     }))
   }
   
+  // Task management functions
+  const addTask = (taskName) => {
+    const newTask = {
+      id: Date.now().toString(),
+      name: taskName,
+      completed: false,
+      createdAt: new Date().toISOString(),
+      pomodoros: 0,
+      estimatedPomodoros: 1
+    }
+    setTasks(prev => [newTask, ...prev])
+    return newTask.id
+  }
+  
+  const updateTask = (taskId, updates) => {
+    setTasks(prev => prev.map(task => 
+      task.id === taskId ? { ...task, ...updates } : task
+    ))
+  }
+  
+  const deleteTask = (taskId) => {
+    setTasks(prev => prev.filter(task => task.id !== taskId))
+    if (currentTaskId === taskId) {
+      setCurrentTaskId(null)
+    }
+  }
+  
+  const selectTask = (taskId) => {
+    setCurrentTaskId(taskId)
+  }
+  
+  const incrementTaskPomodoro = () => {
+    if (currentTaskId) {
+      setTasks(prev => prev.map(task => 
+        task.id === currentTaskId 
+          ? { ...task, pomodoros: task.pomodoros + 1 } 
+          : task
+      ))
+    }
+  }
+  
   // Provide all state and functions to the app
   return (
     <AppContext.Provider
@@ -96,6 +162,13 @@ export const AppProvider = ({ children }) => {
         pauseTimer,
         resetTimer,
         switchMode,
+        tasks,
+        currentTaskId,
+        addTask,
+        updateTask,
+        deleteTask,
+        selectTask,
+        incrementTaskPomodoro
       }}
     >
       {children}

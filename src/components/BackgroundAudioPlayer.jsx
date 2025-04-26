@@ -11,36 +11,6 @@ const BackgroundAudioPlayer = () => {
   const [isPlaying, setIsPlaying] = useState(false)
   const soundRef = useRef(null)
   
-  const backgroundSounds = [
-    { id: 'none', name: 'None', icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" clipRule="evenodd" />
-        <path strokeLinecap="round" strokeLinejoin="round" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
-      </svg>
-    )},
-    { id: 'rain', name: 'Rain', file: `${AUDIO_BASE_URL}calming-rain-257596.mp3`, icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
-        <path strokeLinecap="round" strokeLinejoin="round" strokeDasharray="1,3" d="M7 19v1M12 19v1M17 19v1" />
-      </svg>
-    )},
-    { id: 'quran', name: 'Quran', icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-      </svg>
-    )},
-    { id: 'nature', name: 'Nature', file: `${AUDIO_BASE_URL}forest-nature-322637.mp3`, icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M3.055 11H5a2 2 0 002 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-    )},
-    { id: 'coffee', name: 'Cafe', file: `${AUDIO_BASE_URL}cafe-noise-32940.mp3`, icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M18 8h1a4 4 0 010 8h-1M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z" />
-      </svg>
-    )},
-  ]
-  
   // Setup and manage audio playback with Howler.js
   useEffect(() => {
     // Stop any currently playing sound
@@ -55,15 +25,31 @@ const BackgroundAudioPlayer = () => {
       
       // If we have a file path for the selected sound
       if (currentSound && currentSound.file) {
-        // Create a new Howl instance
+        // Create a new Howl instance with proper looping
         soundRef.current = new Howl({
           src: [currentSound.file],
           loop: true,
           volume: settings.backgroundVolume,
           autoplay: true,
           html5: true, // Better for streaming and long sounds
+          onend: function() {
+            console.log('Sound finished but should be looping');
+          },
+          onloaderror: function() {
+            console.error('Error loading sound file:', currentSound.file);
+          },
+          onplayerror: function() {
+            console.error('Error playing sound file:', currentSound.file);
+            
+            // Try to recover from any play errors by forcing a stop and a fresh play
+            soundRef.current.once('unlock', function() {
+              soundRef.current.play();
+            });
+          }
         })
         
+        // Ensure the sound starts playing
+        soundRef.current.play();
         setIsPlaying(true)
       }
     } else {

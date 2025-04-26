@@ -1,12 +1,14 @@
 import { motion } from 'framer-motion'
-import { useContext } from 'react'
+import { useContext, useEffect } from 'react'
 import Timer from '../components/Timer'
 import SessionStats from '../components/SessionStats'
 import BackgroundAudioPlayer from '../components/BackgroundAudioPlayer'
+import TaskList from '../components/TaskList'
+import FocusAnalytics from '../components/FocusAnalytics'
 import { AppContext } from '../context/AppContext'
 
 const Home = () => {
-  const { timerState } = useContext(AppContext)
+  const { timerState, incrementTaskPomodoro } = useContext(AppContext)
 
   const pageVariants = {
     initial: { opacity: 0, y: 10 },
@@ -41,6 +43,13 @@ const Home = () => {
       }
     }
   }
+
+  // Update pomodoro count for the current task when a pomodoro is completed
+  useEffect(() => {
+    if (timerState.mode === 'pomodoro' && timerState.timeLeft === 0) {
+      incrementTaskPomodoro();
+    }
+  }, [timerState.timeLeft, timerState.mode, incrementTaskPomodoro]);
 
   return (
     <motion.div
@@ -84,7 +93,7 @@ const Home = () => {
           variants={itemVariants}
           className="w-full max-w-xl"
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             <div className="h-full flex">
               <SessionStats />
             </div>
@@ -94,10 +103,26 @@ const Home = () => {
           </div>
         </motion.div>
         
-        {/* Productivity tip section - helpful for focus */}
+        {/* Task List component */}
         <motion.div 
           variants={itemVariants}
-          className="w-full max-w-xl relative"
+          className="w-full max-w-xl mb-8"
+        >
+          <TaskList />
+        </motion.div>
+        
+        {/* Focus Analytics component */}
+        <motion.div 
+          variants={itemVariants}
+          className="w-full max-w-xl mb-8"
+        >
+          <FocusAnalytics />
+        </motion.div>
+        
+        {/* Productivity tip section */}
+        <motion.div 
+          variants={itemVariants}
+          className="w-full max-w-xl relative mb-8"
         >
           <div className="text-center p-5 bg-gray-50/60 dark:bg-gray-800/40 backdrop-blur-xs rounded-xl border border-gray-100 dark:border-gray-800">
             <h3 className="text-sm uppercase tracking-widest text-gray-400 mb-3 font-medium">Productivity Tip</h3>

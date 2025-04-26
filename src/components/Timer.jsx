@@ -11,10 +11,26 @@ const Timer = () => {
     startTimer,
     pauseTimer,
     resetTimer,
-    switchMode
+    switchMode,
+    tasks,
+    currentTaskId
   } = useContext(AppContext)
   
   const [progress, setProgress] = useState(100)
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false)
+  
+  // Check if notifications are available and request permission
+  useEffect(() => {
+    if ("Notification" in window) {
+      if (Notification.permission === "granted") {
+        setNotificationsEnabled(true)
+      } else if (Notification.permission !== "denied") {
+        Notification.requestPermission().then(permission => {
+          setNotificationsEnabled(permission === "granted")
+        })
+      }
+    }
+  }, [])
   
   // Calculate total time based on current mode
   const getTotalTime = () => {
@@ -25,6 +41,21 @@ const Timer = () => {
         return settings.longBreak * 60
       default:
         return settings.pomodoro * 60
+    }
+  }
+  
+  // Show notification when timer completes
+  const showNotification = (title, body) => {
+    if (notificationsEnabled) {
+      const notification = new Notification(title, {
+        body,
+        icon: '/favicon.ico'
+      })
+      
+      // Close notification after 5 seconds
+      setTimeout(() => {
+        notification.close()
+      }, 5000)
     }
   }
   
@@ -44,11 +75,22 @@ const Timer = () => {
       // Timer completed logic
       const totalTime = getTotalTime()
       
-      // Play sound (placeholder for actual implementation)
-      console.log('Timer completed! Playing sound...')
+      // Play notification sound
+      const audio = new Audio('/notification.mp3')
+      audio.volume = settings.alarmVolume
+      audio.play().catch(e => console.log('Error playing audio:', e))
       
       // Handle cycle completion if it was a pomodoro
       if (timerState.mode === 'pomodoro') {
+        const currentTask = tasks.find(t => t.id === currentTaskId)
+        const taskName = currentTask ? currentTask.name : 'your task'
+        
+        // Show notification for completed focus session
+        showNotification(
+          '🍅 Focus Session Complete!', 
+          `Well done! You've completed a focus session${currentTask ? ` on "${taskName}"` : ''}.`
+        )
+        
         const newCycles = timerState.cycles + 1
         const isLongBreakDue = newCycles % settings.longBreakInterval === 0
         
@@ -76,6 +118,14 @@ const Timer = () => {
         }
       } else {
         // Coming back from a break
+        const breakType = timerState.mode === 'shortBreak' ? 'short' : 'long'
+        
+        // Show notification for completed break
+        showNotification(
+          timerState.mode === 'shortBreak' ? '☕ Short Break Complete!' : '🏖️ Long Break Complete!',
+          `Your ${breakType} break is over. Time to get back to work!`
+        )
+        
         setTimerState(prev => ({
           ...prev,
           isRunning: false
@@ -91,7 +141,7 @@ const Timer = () => {
     }
     
     return () => clearInterval(interval)
-  }, [timerState, settings, setTimerState, startTimer, switchMode])
+  }, [timerState, settings, setTimerState, startTimer, switchMode, tasks, currentTaskId, notificationsEnabled])
   
   // Update progress bar
   useEffect(() => {

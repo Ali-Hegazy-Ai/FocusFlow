@@ -3,8 +3,8 @@ import { motion } from 'framer-motion'
 import { Howl } from 'howler'
 import { AppContext } from '../context/AppContext'
 
-// Base URL for audio files
-const AUDIO_BASE_URL = 'https://raw.githubusercontent.com/Ali-Hegazy-Ai/FocusFlow/main/src/pages/'
+// Base URL for audio files - using jsDelivr CDN which works well with GitHub files
+const AUDIO_BASE_URL = 'https://cdn.jsdelivr.net/gh/Ali-Hegazy-Ai/FocusFlow@main/src/pages/'
 
 const BackgroundAudioPlayer = () => {
   const { settings, updateSettings } = useContext(AppContext)     

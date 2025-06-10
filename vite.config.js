@@ -3,7 +3,8 @@ import react from '@vitejs/plugin-react';
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],  build: {
+  plugins: [react()],
+  base: './',build: {
     // Enable tree shaking and minification
     minify: 'terser',
     terserOptions: {
